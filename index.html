@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineWeb - Ver Películas</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #141414; color: #fff; }
+    header {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      gap: 15px; padding: 20px 40px; background: #000;
+      position: sticky; top: 0; z-index: 10;
+    }
+    header h1 { color: #e50914; font-size: 28px; }
+    header input, header select {
+      padding: 10px; border: none; border-radius: 4px; font-size: 14px;
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px; padding: 30px 40px;
+    }
+    .card {
+      background: #222; border-radius: 8px; overflow: hidden;
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .card:hover { transform: scale(1.05); }
+    .card img { width: 100%; height: 270px; object-fit: cover; }
+    .card-info { padding: 10px; }
+    .card-info h3 { font-size: 16px; margin-bottom: 5px; }
+    .card-info p { font-size: 13px; color: #aaa; }
+    .player {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+      z-index: 100; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .player.active { display: flex; }
+    .player video { width: 90%; max-width: 1000px; border-radius: 8px; background: #000; }
+    .player h2 { margin-bottom: 15px; }
+    .player .close {
+      margin-top: 15px; padding: 10px 25px; background: #e50914; color: #fff;
+      border: none; border-radius: 4px; cursor: pointer; font-size: 16px;
+    }
+    .empty { text-align: center; padding: 50px; color: #888; grid-column: 1 / -1; }
+    @media (max-width: 600px) {
+      header { padding: 15px; }
+      .grid { padding: 20px 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>CineWeb</h1>
+    <input type="text" id="search" placeholder="Buscar película...">
+    <select id="genre">
+      <option value="">Todos los géneros</option>
+      <option value="Acción">Acción</option>
+      <option value="Comedia">Comedia</option>
+      <option value="Drama">Drama</option>
+      <option value="Ciencia ficción">Ciencia ficción</option>
+    </select>
+  </header>
+
+  <main class="grid" id="movieGrid"></main>
+
+  <div class="player" id="player">
+    <h2 id="playerTitle"></h2>
+    <video id="videoPlayer" controls></video>
+    <button class="close" onclick="closePlayer()">Cerrar</button>
+  </div>
+
+  <script>
+    // Sustituye las URLs de "video" por enlaces a tus propios archivos de video
+    const movies = [
+      {
+        title: "Viaje al Futuro",
+        genre: "Ciencia ficción",
+        year: 2023,
+        poster: "https://via.placeholder.com/300x450/1a1a2e/ffffff?text=Viaje+al+Futuro",
+        video: "https://www.w3schools.com/html/mov_bbb.mp4"
+      },
+      {
+        title: "Risas sin Fin",
+        genre: "Comedia",
+        year: 2022,
+        poster: "https://via.placeholder.com/300x450/e94560/ffffff?text=Risas+sin+Fin",
+        video: "https://www.w3schools.com/html/movie.mp4"
+      },
+      {
+        title: "Frontera Oscura",
+        genre: "Acción",
+        year: 2024,
+        poster: "https://via.placeholder.com/300x450/0f3460/ffffff?text=Frontera+Oscura",
+        video: "https://www.w3schools.com/html/mov_bbb.mp4"
+      },
+      {
+        title: "Silencio",
+        genre: "Drama",
+        year: 2021,
+        poster: "https://via.placeholder.com/300x450/533483/ffffff?text=Silencio",
+        video: "https://www.w3schools.com/html/movie.mp4"
+      }
+    ];
+
+    const grid = document.getElementById("movieGrid");
+    const searchInput = document.getElementById("search");
+    const genreSelect = document.getElementById("genre");
+
+    function renderMovies() {
+      const text = searchInput.value.toLowerCase();
+      const genre = genreSelect.value;
+
+      const filtered = movies.filter(m =>
+        m.title.toLowerCase().includes(text) &&
+        (genre === "" || m.genre === genre)
+      );
+
+      grid.innerHTML = "";
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<p class="empty">No se encontraron películas.</p>';
+        return;
+      }
+
+      filtered.forEach((movie, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${movie.poster}" alt="${movie.title}">
+          <div class="card-info">
+            <h3>${movie.title}</h3>
+            <p>${movie.genre} · ${movie.year}</p>
+          </div>`;
+        card.addEventListener("click", () => openPlayer(movie));
+        grid.appendChild(card);
+      });
+    }
+
+    function openPlayer(movie) {
+      document.getElementById("playerTitle").textContent = movie.title;
+      const video = document.getElementById("videoPlayer");
+      video.src = movie.video;
+      document.getElementById("player").classList.add("active");
+      video.play();
+    }
+
+    function closePlayer() {
+      const video = document.getElementById("videoPlayer");
+      video.pause();
+      video.src = "";
+      document.getElementById("player").classList.remove("active");
+    }
+
+    searchInput.addEventListener("input", renderMovies);
+    genreSelect.addEventListener("change", renderMovies);
+
+    renderMovies();
+  </script>
+
+</body>
+</html>
